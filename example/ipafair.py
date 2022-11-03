@@ -31,12 +31,12 @@ class AFSolver(ABC):
 
     # Adds the attack att to the current AF instance.
     @abstractmethod
-    def add_attack(self, att: Tuple[int, int]):
+    def add_attack(self, source: int, target: int):
         raise NotImplementedError
 
     # Deletes the attack att from the current AF instance.
     @abstractmethod
-    def del_attack(self, att: Tuple[int, int]):
+    def del_attack(self, source: int, target: int):
         raise NotImplementedError
 
     # Solves the current AF instance under the specified semantics in the
