@@ -29,12 +29,12 @@ class AFSolver(ABC):
     def del_argument(self, arg: int):
         raise NotImplementedError
 
-    # Adds the attack att to the current AF instance.
+    # Adds the attack (source,target) to the current AF instance.
     @abstractmethod
     def add_attack(self, source: int, target: int):
         raise NotImplementedError
 
-    # Deletes the attack att from the current AF instance.
+    # Deletes the attack (source,target) from the current AF instance.
     @abstractmethod
     def del_attack(self, source: int, target: int):
         raise NotImplementedError
