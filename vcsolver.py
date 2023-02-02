@@ -1,4 +1,4 @@
-from typing import List, cast
+from abc import ABC, abstractmethod
 
 from clingo.core import TruthValue
 from clingo.control import Control
@@ -8,9 +8,11 @@ from clingo.solving import Model, SolveResult
 from clingox.program import Program, ProgramObserver
 from clingox.backend import SymbolicBackend
 
+from typing import List, cast
+
 from re import match
 
-from abc import ABC, abstractmethod
+import logging
 
 class VertexCoverSolver(ABC):
     '''
@@ -335,7 +337,7 @@ class SimpleVertexCoverSolver(VertexCoverSolver):
                         
                         for u in edge_list:
                             backend.add_external(Function("edge", [Number(v), Number(u)]), TruthValue(True))
-                            if undirected:
+                            if self.undirected:
                                 backend.add_external(Function("edge", [Number(u), Number(v)]), TruthValue(True))
 
         def load_instance_without_external(instance: str):
@@ -382,11 +384,16 @@ class SimpleVertexCoverSolver(VertexCoverSolver):
                 print("\n === Instance ===")
                 print(self.prg)
 
+        logger = logging.getLogger()
+        # logger.disabled = True
+
         self.ctl.load("asp/vertex-cover.lp")
         self.ctl.add("debug", [], "#show in/1.")
         self.ctl.ground([("init", [])])
 
-        if self.debug:
+        # logger.disabled = False
+
+        if self.debug and instance:
             print("\n === Ground program ===")
             print(self.prg)
 
