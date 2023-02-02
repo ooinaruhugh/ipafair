@@ -310,7 +310,7 @@ class BussSolver(VertexCoverSolver):
         raise NotImplementedError
 
 class SimpleVertexCoverSolver(VertexCoverSolver):
-    def __init__(self, instance: str, incremental = True, debug = False, show_models = False):
+    def __init__(self, instance: str = "", incremental = True, debug = False, show_models = False):
         def load_instance_with_external(instance: str):
             """
             This method is only used internally. 
@@ -370,16 +370,17 @@ class SimpleVertexCoverSolver(VertexCoverSolver):
         self.show_models = show_models
         self.undirected = True
 
-        if incremental:
-            load_instance_with_external(instance)
-        else:
-            load_instance_without_external(instance)
-            self.ctl.add("instance", [], "edge(X,Y) :- edge(Y,X).")
-            self.ctl.ground([("instance", [])])
+        if instance:
+            if incremental:
+                load_instance_with_external(instance)
+            else:
+                load_instance_without_external(instance)
+                self.ctl.add("instance", [], "edge(X,Y) :- edge(Y,X).")
+                self.ctl.ground([("instance", [])])
 
-        if self.debug:
-            print("\n === Instance ===")
-            print(self.prg)
+            if self.debug:
+                print("\n === Instance ===")
+                print(self.prg)
 
         self.ctl.load("asp/vertex-cover.lp")
         self.ctl.add("debug", [], "#show in/1.")
