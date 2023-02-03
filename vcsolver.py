@@ -14,6 +14,93 @@ from re import match
 
 import logging
 
+def load_dimacs_without_external(ctl: Control, instance: str) -> dict:
+    """
+    This method is only used internally. 
+    It is meant to read the Vertex-Cover instance and feed it to clingo 
+    as external atoms.
+    """
+    result = dict()
+    with open(instance, "r", encoding="utf-8") as f:
+        parameters = f.readline().strip().split(" ")
+        while parameters[0] == "c":
+            parameters = f.readline().strip().split(" ")
+        if parameters[0] != "p" or parameters[1] != "vc":
+            raise Exception
+
+        n = int(parameters[2])
+        result["undirected"] = ("<->" in parameters)
+
+        for v in range(1,n+1):
+            ctl.add("instance", [], f"vertex({v}).")
+
+        for line in f:
+            if line[0] == "c":
+                continue
+
+            v, edge_list = line.split("|")
+            v = int(v)
+            
+            edge_list = edge_list.strip()
+            edge_list = [int(v) for v in edge_list.split(" ")]
+            
+            for u in edge_list:
+                ctl.add("instance", [], f"edge({v}, {u}).")
+
+    return result
+
+def load_dimacs_with_external(ctl: Control, instance: str) -> dict:
+    """
+    This method is only used internally. 
+    It is meant to read the Vertex-Cover instance and feed it to clingo 
+    as external atoms.
+    """
+    result = dict()
+    with open(instance, "r", encoding="utf-8") as f:
+        parameters = f.readline().strip().split(" ")
+        while parameters[0] == "c":
+            parameters = f.readline().strip().split(" ")
+        if parameters[0] != "p" or parameters[1] != "vc":
+            raise Exception
+
+        n = int(parameters[2])
+        result["undirected"] = ("<->" in parameters)
+
+        with SymbolicBackend(ctl.backend()) as backend:
+            for v in range(1,n+1):
+                backend.add_external(Function("vertex", [Number(v)]), TruthValue(True))
+
+            for line in f:
+                if line.strip().split(" ")[0] == "c":
+                    continue
+
+                v, edge_list = line.split("|")
+                v = int(v)
+                
+                edge_list = edge_list.strip()
+                edge_list = [int(v) for v in edge_list.split(" ")]
+                
+                for u in edge_list:
+                    backend.add_external(Function("edge", [Number(v), Number(u)]), TruthValue(True))
+                    if result["undirected"]:
+                        backend.add_external(Function("edge", [Number(u), Number(v)]), TruthValue(True))
+
+    return result
+
+def load_asp(ctl: Control, instance: str):
+    with open(instance, "r", encoding="utf-8") as f:
+        tmp = Control()
+        tmp.load(instance)
+        tmp.ground()
+        tmp.ground([("instance", [])])
+
+        with SymbolicBackend(ctl.backend()) as backend:
+            for v in tmp.symbolic_atoms.by_signature("vertex", 1):
+                backend.add_external(v.symbol, TruthValue(True))
+
+            for e in tmp.symbolic_atoms.by_signature("edge", 2):
+                backend.add_external(e.symbol, TruthValue(True))
+
 class VertexCoverSolver(ABC):
     '''
     A simple, incremental Vertex-Cover solver using clingo.
@@ -312,71 +399,22 @@ class BussSolver(VertexCoverSolver):
         raise NotImplementedError
 
 class SimpleVertexCoverSolver(VertexCoverSolver):
-    def __init__(self, instance: str = "", incremental = True, debug = False, show_models = False):
-        def load_instance_with_external(instance: str):
-            """
-            This method is only used internally. 
-            It is meant to read the Vertex-Cover instance and feed it to clingo 
-            as external atoms.
-            """
-            with open(instance, "r", encoding="utf-8") as f:
-                parameters = f.readline().strip().split(" ")
-                n = int(parameters[0])
-                self.undirected = (parameters[1] == "<->")
-
-                with SymbolicBackend(self.ctl.backend()) as backend:
-                    for v in range(1,n+1):
-                        backend.add_external(Function("vertex", [Number(v)]), TruthValue(True))
-
-                    for line in f:
-                        v, edge_list = line.split("|")
-                        v = int(v)
-                        
-                        edge_list = edge_list.strip()
-                        edge_list = [int(v) for v in edge_list.split(" ")]
-                        
-                        for u in edge_list:
-                            backend.add_external(Function("edge", [Number(v), Number(u)]), TruthValue(True))
-                            if self.undirected:
-                                backend.add_external(Function("edge", [Number(u), Number(v)]), TruthValue(True))
-
-        def load_instance_without_external(instance: str):
-            """
-            This method is only used internally. 
-            It is meant to read the Vertex-Cover instance and feed it to clingo 
-            as external atoms.
-            """
-            with open(instance, "r", encoding="utf-8") as f:
-                parameters = f.readline().strip().split(" ")
-                n = int(parameters[0])
-                self.undirected = (parameters[1] == "<->")
-
-                for v in range(1,n+1):
-                    self.ctl.add("instance", [], f"vertex({v}).")
-
-                for line in f:
-                    v, edge_list = line.split("|")
-                    v = int(v)
-                    
-                    edge_list = edge_list.strip()
-                    edge_list = [int(v) for v in edge_list.split(" ")]
-                    
-                    for u in edge_list:
-                        self.ctl.add("instance", [], f"edge({v}, {u}).")
-
+    def __init__(self, instance: str = "", debug = False, show_models = False, format: str = "dimacs_incr"):
         self.ctl = Control(arguments=["--models=0"])
         self.prg = Program()
         self.ctl.register_observer(ProgramObserver(self.prg))
 
         self.debug = debug
         self.show_models = show_models
-        self.undirected = True
 
+        parameters = dict()
         if instance:
-            if incremental:
-                load_instance_with_external(instance)
-            else:
-                load_instance_without_external(instance)
+            if format == "asp":
+                load_asp(self.ctl, instance)
+            elif format == "dimacs_incr":
+                parameters = load_dimacs_with_external(self.ctl, instance)
+            elif format == "dimacs":
+                parameters = load_dimacs_without_external(self.ctl, instance)
                 self.ctl.add("instance", [], "edge(X,Y) :- edge(Y,X).")
                 self.ctl.ground([("instance", [])])
 
@@ -384,14 +422,11 @@ class SimpleVertexCoverSolver(VertexCoverSolver):
                 print("\n === Instance ===")
                 print(self.prg)
 
-        logger = logging.getLogger()
-        # logger.disabled = True
+        self.undirected = parameters.get("undirected", True)
 
         self.ctl.load("asp/vertex-cover.lp")
         self.ctl.add("debug", [], "#show in/1.")
         self.ctl.ground([("init", [])])
-
-        # logger.disabled = False
 
         if self.debug and instance:
             print("\n === Ground program ===")
@@ -418,12 +453,21 @@ class SimpleVertexCoverSolver(VertexCoverSolver):
         if not old: self.ctl.ground([("add_edge", [Number(v), Number(u)])])
 
     def del_vertex(self, v: int):
-        self.ctl.release_external(Function("vertex", [Number(v)]))
+        # self.ctl.release_external(Function("vertex", [Number(v)]))
+        self.ctl.assign_external(Function("vertex", [Number(v)]), False)
+
+        for edge in self.ctl.symbolic_atoms.by_signature("edge", 2):
+            A, B = edge.symbol.arguments
+            if Number(v) == A or Number(v) == B:
+                self.ctl.assign_external(Function("edge", [A, B]), False)
+
 
     def del_edge(self, v: int, u: int):
-        self.ctl.release_external(Function("edge", [Number(v), Number(u)]))
+        # self.ctl.release_external(Function("edge", [Number(v), Number(u)]))
+        self.ctl.assign_external(Function("edge", [Number(v), Number(u)]), False)
         if self.undirected:
-            self.ctl.release_external(Function("edge", [Number(u), Number(v)]))
+            # self.ctl.release_external(Function("edge", [Number(u), Number(v)]))
+            self.ctl.assign_external(Function("edge", [Number(u), Number(v)]), False)
 
     def solve(self, assumptions: List[int] = []) -> bool:
         def on_model(m: Model):
@@ -443,7 +487,8 @@ if __name__ == "__main__":
         print("\n === Ground program ===")
         print(vc.prg)
 
-    vc = SimpleVertexCoverSolver("asp/instance2.vc", debug = True, show_models=True)
+    vc = SimpleVertexCoverSolver("asp/instance2.vc", format="dimacs_incr", debug = True, show_models=True)
+    # vc = SimpleVertexCoverSolver("asp/vc-instance.lp", format="asp", debug = True, show_models=True)
 
     print(" === Solve the instance ===")
     print(vc.solve(), vc.model_count)
@@ -472,12 +517,19 @@ if __name__ == "__main__":
     vc.del_edge(1, 2)
     print(vc.solve(), vc.model_count)
 
-    dump_ground_program(vc)
+    # dump_ground_program(vc)
 
     print(" === Add that edge again === ")
+    vc.add_edge(1, 2)
+    print(vc.solve(), vc.model_count)
+
+    print(" === Delete a vertex === ")
+    vc.del_vertex(2)
+    print(vc.solve(), vc.model_count)
+
+    print(" === Restore the state === ")
     vc.add_vertex(2)
     vc.add_edge(1, 2)
     print(vc.solve(), vc.model_count)
 
-    print("\n === Ground program ===")
-    print(vc.prg)
+    dump_ground_program(vc)
