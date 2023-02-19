@@ -12,7 +12,7 @@ from itertools import product
 
 from typing import List, cast, overload
 
-from debug import solve_and_dump_model
+from debug import solve_and_dump_model, dump_symbolic_atoms
 
 class incr_af_solver(ipafair.AFSolver):
     def __init__(self, sigma: str, af_file: str | None = None):
@@ -80,6 +80,9 @@ class incr_af_solver(ipafair.AFSolver):
         elif sigma == "adm":
             # self.ctl.load("dung/adm.dl")
             self.ctl.load("incr-dung/adm.lp")
+        elif sigma == "stable":
+            # self.ctl.load("dung/adm.dl")
+            self.ctl.load("incr-dung/stable.lp")
         else:
             raise KeyError("Semantics name is not known")
 
@@ -278,8 +281,8 @@ if __name__ == "__main__":
     ctl.load("asp/filter.lp")
     ctl.ground()
 
-    print("\n === Ground static program ===")
-    print(prg)
+    # print("\n === Ground static program ===")
+    # print(prg)
 
     print("\n\n === Solve and enumerate the static thing ===")
     def on_model(m: Model):
@@ -288,8 +291,8 @@ if __name__ == "__main__":
 
     # Now, we do the same incrementally
     af = incr_af_solver(semantic, filename)
-    print("\n === Ground incremental program ===")
-    print(af.prg)
+    # print("\n === Ground incremental program ===")
+    # print(af.prg)
 
     print("\n\n === Solve and enumerate ===")
     af.solve_enum()
