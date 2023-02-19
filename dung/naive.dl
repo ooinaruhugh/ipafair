@@ -14,4 +14,4 @@ out(X) :- not in(X), arg(X).
 okOut(X) :- in(Y), att(Y,X).
 okOut(X) :- in(Y), att(X,Y).
 okOut(X) :- att(X,X).
-:-  out(X), not okOut(X).
+:- out(X), not okOut(X).

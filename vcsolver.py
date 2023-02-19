@@ -88,6 +88,10 @@ def load_dimacs_with_external(ctl: Control, instance: str) -> dict:
     return result
 
 def load_asp(ctl: Control, instance: str):
+    # We basically throw the instance into a temporary
+    # context to get objects for the atoms.
+    # Then, we feed those into the actual solver context,
+    # as externals.
     with open(instance, "r", encoding="utf-8") as f:
         tmp = Control()
         tmp.load(instance)
