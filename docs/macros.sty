@@ -1,0 +1,511 @@
+%%%%%%% The usual math stuff %%%%%%%%%%
+\usepackage[fixamsmath,disallowspaces]{mathtools}
+% \usepackage[disallowspaces]{mathtools}
+% \usepackage{fixmath}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+
+%% Bunten Boxen, wer will bunte Boxen?
+\usepackage[breakable,xparse]{tcolorbox}
+%\usepackage[minted,breakable,xparse]{tcolorbox}
+
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+\usepackage{standalone}
+% \usepackage[pdf]{pstricks}
+% \usepackage{pst-func}
+\usepackage{subcaption}
+\captionsetup{subrefformat=parens, labelformat=parens}
+
+\usepackage{algorithmicx}
+\usepackage[Algorithmus]{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,decorations.pathreplacing,shapes}
+\usetikzlibrary{positioning,fit}
+\usetikzlibrary{graphs,graphs.standard}
+
+\tikzstyle{treenode} = [circle,minimum size=1cm,draw]
+\usetikzlibrary{shapes}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{patterns}
+\usetikzlibrary{chains}
+\usetikzlibrary{fit}
+\usetikzlibrary{calc}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% if switches
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newif\ifextended
+\newif\ifdev
+\devtrue
+\extendedtrue
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beautiful colors
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{xcolor} 
+\definecolor{cornflowerblue}{HTML}{6495ED}
+\definecolor{apricot}{HTML}{FBCEB1}
+\definecolor{pastelred}{HTML}{ff6961}
+\definecolor{pastelgreen}{HTML}{77dd77}
+
+% My basic todo commands
+
+\newcommand{\xxx}[1]{\ifextended\textsf{\textcolor{blue}{#1}}\fi}
+\newcommand{\xxxtodo}[1]{\ifdev\textsf{\textbf{\textcolor{magenta}{TODO: #1}}}\fi}
+\newcommand{\arne}[1]{\textsf{\textbf{\textcolor{green!50!black}{Arne: #1}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% Todonotes Varianten
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{todonotes}
+\newcommand{\devtodo}[2][]
+{\ifdev\todo[#1]{#2}\fi}
+
+\newcommand{\idea}[2][]{\devtodo[color=blue!30, #1]{#2}}
+\newcommand{\nitpick}[2][]{\devtodo[color=green!50, #1]{#2}}
+\newcommand{\missing}[2][]{\devtodo[color=yellow!100, #1]{#2}}
+\newcommand{\style}[2][]{\devtodo[color=red!30, #1]{#2}}
+\newcommand{\fixme}[2][]{\devtodo[color=red!50, #1]{#2}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Typefaces for every situation (in the complexity theorist's life)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\numberClassFont}[1]{\protect\ensuremath{\mathbb{#1}}}     % N, Z, Q, ...
+
+\newcommand{\complClFont}[1]{\protect\ensuremath{\mathsf{#1}}}         % P, NP, NL, ...
+% \newcommand{\complClFont}[1]{\protect\ensuremath{\mathbf{#1}}}         % P, NP, NL, ...
+
+\newcommand{\logicClFont}[1]{\protect\ensuremath{\mathrm{#1}}}        % PDL, MSO, ...
+\newcommand{\logicOpFont}[1]{\protect\ensuremath{\mathsf{#1}}}         % dep, ...
+
+% \newcommand{\problemFont}[1]{\protect\ensuremath{\mathrm{#1}}}         % SAT, TAUT, IMP, ...
+\newcommand{\problemFont}[1]{\protect\ensuremath{\mathsf{#1}}}         % SAT, TAUT, IMP, ...
+
+\newcommand{\mathCommandFont}[1]{\protect\ensuremath{\mathrm{#1}}}     % max, min, ...
+\newcommand{\struc}[1]{\protect\ensuremath{\mathbf{#1}}}
+\newcommand{\class}[1]{\protect\ensuremath{\mathcal{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Symbols
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Definition
+\newcommand{\dfn}{\mathrel{\mathop:}=}
+
+% Sets (of numbers etc.)
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Complex}{\ensuremath{\mathbb{C}}}
+\newcommand{\Q}{\ensuremath{\mathbb{Q}}}
+
+% Groups
+\newcommand{\GL}{\ensuremath{\mathbb{GL}}}
+\newcommand{\SL}{\ensuremath{\mathbb{SL}}}
+\renewcommand{\L}{\ensuremath{\mathbb{L}}}
+\renewcommand{\O}{\ensuremath{\mathbb{O}}}
+\newcommand{\SO}{\ensuremath{\mathbb{SO}}}
+
+% Others
+%% Alphabet Propositional Logic
+\newcommand{\AlphAL}{\ensuremath{\Sigma_{\mathsf{AL}}} }
+%% Formulas of Propositional Logic
+\newcommand{\FormAL}{\ensuremath{\mathsf{Form}_{\mathsf{AL}}} }
+%% Variables
+\newcommand{\Vars}{\ensuremath{\mathsf{Var}} }
+% %% Resolventen Aussagenlogik
+% \newcommand{\ResSet}{\ensuremath{\mathsf{res}} }
+
+%% Information divergence
+\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
+  #1\;\delimsize\|\;#2%
+}
+\newcommand{\kldiv}[1][]{K_{#1}\infdivx}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Math operators and symbols
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{faktor}
+\newcommand{\quot}[2]{\left.#1 \middle/#2\right.}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert} 
+
+\newcommand{\iu}{\mathrm{i}\mkern1mu}
+
+% \DeclareMathOperator{\deg}{}
+% \DeclareMathOperator{\exp}{exp}
+\DeclareMathOperator{\Hom}{Hom}
+\DeclareMathOperator{\Jac}{Jac}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\ev}{ev}
+\DeclareMathOperator{\rk}{rk}
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\height}{ht}
+\DeclareMathOperator{\Spec}{Spec}
+\DeclareMathOperator{\LM}{LM}
+\DeclareMathOperator{\LT}{LT}
+\DeclareMathOperator{\LC}{LC}
+\DeclareMathOperator{\Syz}{Syz}
+\DeclareMathOperator{\Aut}{Aut}
+\DeclareMathOperator{\Pic}{Pic}
+\DeclareMathOperator{\Char}{char}
+\DeclareMathOperator{\ord}{ord}
+\DeclareMathOperator{\maxord}{max-ord}
+\DeclareMathOperator{\Maxord}{Max-ord}
+\DeclareMathOperator{\Maxv}{Max-}
+\DeclareMathOperator{\maxv}{max-}
+\DeclareMathOperator{\gr}{gr}
+\DeclareMathOperator{\Gr}{Gr}
+\DeclareMathOperator{\kgV}{kgV}
+\DeclareMathOperator{\initial}{in}
+\DeclareMathOperator{\Initial}{In}
+\DeclareMathOperator{\trdeg}{trdeg}
+\DeclareMathOperator{\divisor}{div}
+\DeclareMathOperator{\Bl}{Bl}
+\DeclareMathOperator{\Diff}{Diff}
+\DeclareMathOperator{\Hess}{Hess}
+\DeclareMathOperator{\Frac}{Frac}
+\DeclareMathOperator{\ggT}{ggT}
+% \DeclareMathOperator{\gcd}{gcd}
+\DeclareMathOperator{\codim}{codim}
+\DeclareMathOperator{\Sing}{Sing}
+\newcommand{\Etoile}{\Sigma^*}
+\newcommand{\GammaEtoile}{\Sigma^*}
+%\DeclareMathOperator{\maxv}{max-$\nu$}
+
+% Bild einer Funktion
+\DeclareMathOperator{\Bild}{Bild}
+
+% Potenzmenge
+\DeclareMathOperator{\Pot}{\mathcal{P}}
+
+\newcommand{\hateq}{\mathrel{\widehat{=}}}
+\newcommand{\isin}{\mathrel{\overset{?}{\in}}}
+\newcommand{\notimplies}{\centernot\implies}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Komplexitätsklassen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\bigo}{\mathcal{O}}
+
+% Measures
+\newcommand{\TIME}{\complClFont{TIME}}
+\newcommand{\SPACE}{\complClFont{SPACE}}
+\newcommand{\DTIME}{\complClFont{DTIME}}
+\newcommand{\DSPACE}{\complClFont{DSPACE}}
+\newcommand{\NTIME}{\complClFont{NTIME}}
+\newcommand{\NSPACE}{\complClFont{NSPACE}}
+
+% Classic
+\newcommand{\Logspace}{\complClFont{L}}
+\newcommand{\NL}{\complClFont{NL}}
+\newcommand{\DP}{\complClFont{P}}
+\newcommand{\NP}{\complClFont{NP}}
+\newcommand{\PSPACE}{\complClFont{PSPACE}}
+\newcommand{\EXPTIME}{\complClFont{EXP}}
+
+% PH
+\newcommand{\PH}{\complClFont{PH}}
+
+% Probabilistic
+\newcommand{\PP}{\complClFont{PP}}
+\newcommand{\ZPP}{\complClFont{ZPP}}
+\newcommand{\BPP}{\complClFont{BPP}}
+\newcommand{\RP}{\problemFont{RP}}
+
+%% Parametrised
+\newcommand{\FPT}{\complClFont{FPT}}
+\newcommand{\fpt}{\textit{fpt}}
+\newcommand{\XP}{\complClFont{XP}}
+\newcommand{\W}[1]{\protect\ensuremath{\complClFont{W}\ifx#1\empty\else\mathsf{[#1]}\fi}}
+\newcommand{\A}[1]{\protect\ensuremath{\complClFont{A}\ifx#1\empty\else\mathsf{[#1]}\fi}}
+
+%% Circuit compelxity
+\newcommand{\SC}[1]{\protect\ensuremath{\complClFont{SC^{#1}}}\xspace}
+\newcommand{\AC}[1]{\protect\ensuremath{\complClFont{AC^{#1}}}\xspace}
+\newcommand{\NC}[1]{\protect\ensuremath{\complClFont{NC^{#1}}}\xspace}
+\newcommand{\TC}[1]{\protect\ensuremath{\complClFont{TC^{#1}}}\xspace}
+
+%% Stuff, prefixes
+\newcommand{\gap}{\complClFont{Gap}}
+\newcommand{\DBP}{\complClFont{DBP}}
+\newcommand{\lab}{{\complClFont{label}}}
+\newcommand{\calc}{{\class{C}}}
+\newcommand{\bp}{{\complClFont{BP}}}
+\newcommand{\sh}{\ensuremath{\#}}
+\newcommand{\F}{\complClFont{F}}
+
+%% Parmetrized prefixes
+\newcommand{\para}{\complClFont{para}\text-}
+% \newcommand{\parawt}{\ensuremath{{\complClFont{para}}_{{\complClFont{W}}[1]}}}
+% \newcommand{\parabt}{\ensuremath{{\complClFont{para}}_{\beta{\complClFont{tail}}}}}
+% \newcommand{\paraBetaL}{\parab\L}
+% \newcommand{\paraBetaDBP}{\complClFont{para}_\beta\DBP}
+% \newcommand{\paraWL}{\complClFont{para}_W\L}
+% \newcommand{\paraw}{\ensuremath{{\complClFont{para}}_{\complClFont{W}}}}
+% \newcommand{\parab}{\ensuremath{{\complClFont{para}}_\beta}}
+
+% \newcommand{\leqfpt}{\leq^{\mathrm{fpt}}}
+\newcommand{\leqfpt}{\leq^{\fpt}}
+\newcommand{\equivfpt}{\equiv^{\fpt}}
+\newcommand{\closfpt}[1]{\protect\ensuremath{[#1]^{\fpt}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Entscheidungsprobleme
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\decproblem}[1]{\problemFont{#1}}
+% \newcommand{\decproblem}[1]{\ensuremath{\mathsf{#1}}}
+
+% prefixes, suffixes
+
+\newcommand{\p}{\problemFont{p\text-}}
+\newcommand{\bdegree}{_b}
+\newcommand{\nonuniform}{_{nu}}
+
+
+\newcommand{\decPi}{\decproblem{\Pi}}
+
+\newcommand{\EXPDTMHALT}{\problemFont{EXP\text-DTM\text-HALT}}
+
+% Graphen
+\newcommand{\Clique}{\problemFont{Clique}}
+\newcommand{\VC}{\problemFont{Vertex\text-Cover}}
+\newcommand{\IS}{\problemFont{Independent\text-Set}}
+\newcommand{\DS}{\problemFont{Dominating\text-Set}}
+
+% Logik
+\newcommand{\SAT}{\problemFont{SAT}}
+\newcommand{\TAUT}{\problemFont{TAUT}}
+\newcommand{\HORNSAT}{\problemFont{HORN\SAT}}
+
+
+% Parametrisiert
+\newcommand{\pVC}{\decproblem{p\text-Vertex\text-Cover}}
+\newcommand{\pSAT}{\decproblem{p\text-SAT}}
+\newcommand{\pIS}{\decproblem{p\text-Independent\text-Set}}
+\newcommand{\pDS}{\decproblem{p\text-Dominating\text-Set}}
+\newcommand{\pCLIQUE}{\decproblem{p\text-Clique}}
+
+\newcommand{\WSAT}[1]{\ensuremath{\problemFont{WSAT}\ifx#1\empty\else(#1)\fi}}
+\newcommand{\MWSAT}[2]{\ensuremath{\problemFont{#1}}\text-\WSAT{#2}}
+
+\newcommand{\WSATGammatd}[2]{\problemFont{WSAT}(\Gamma_{#1,#2})}
+\newcommand{\MWSATGammatd}[3]{\problemfont{#1-}\WSATGammatd{#2}{#3}}
+
+\newcommand{\HdIS}[1][d]{\problemFont{Hypergraph\ #1\text-\IS}}
+\newcommand{\HdC}[1][d]{\problemFont{Hypergraph\ #1\text-\Clique}}
+
+% \newcommand{\HdIS}[1][d]{\textsf{Hypergraph #1-Independent-Set}}
+% \newcommand{\HdIS}[1][d]{\decproblem{Hypergraph\ #1\textsf{-}Independent\textsf{-}Set}}
+% % \newcommand{\HdC}[1][d]{\textsf{Hypergraph #1-Clique}}
+% \newcommand{\HdC}[1][d]{\decproblem{Hypergraph\ #1\textsf{-}Clique}}
+
+% \newcommand{\EXPDTMHALT}{\decproblem{p\textsf{-}EXP\textsf{-}DTM\textsf{-}HALT}}
+
+
+% incremental
+\newcommand{\incr}{\problemFont{incr\text-}}
+\newcommand{\changes}[1][\Delta]{\ensuremath{(#1)}}
+
+\newcommand{\incrproblem}[1]{\incr\problemFont{#1}}
+\newcommand{\incrVC}[1][]{\ensuremath{\incr\VC#1}}
+\newcommand{\incrDS}[1][]{\ensuremath{\incr\DS#1}}
+\newcommand{\incrIS}[1][]{\ensuremath{\incr\IS#1}}
+
+
+
+% Other stuff
+\newcommand{\CNF}{\text-\problemFont{CNF}}
+
+\newcommand{\atleast}[1]{^{\ge#1}}
+
+\newcommand{\WALK}{\problemFont{WALK}} 
+\newcommand{\CIRC}{\problemFont{CIRC}} 
+\newcommand{\LOG}{\problemFont{LOG}} 
+\newcommand{\reach}{\problemFont{REACH}}
+%\newcommand{\Hom}{\problemFont{HOM}}
+\renewcommand{\dag}{\problemFont{dag}}
+\newcommand{\cyclecover}{\problemFont{CC}}
+\newcommand{\MC}[1]{\problemFont{MC}(#1)}
+\newcommand{\pcountHom}[1]{\p\sh\problemFont{Hom}(#1)}
+\newcommand{\reachcolour}{\reach^*}
+\newcommand{\reachbp}{\reach\mbox-\problemFont{BP}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Symbole
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Resolution
+\newcommand{\Res}{\ensuremath{\vdash_{\mathsf{Res}}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Besondere Funktionen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Aussagenlogik
+%% Teilformeln
+\newcommand{\subAL}{\ensuremath{\mathsf{sub}_{\mathsf{AL}}}}
+% Belegung
+\newcommand{\Bel}{\ensuremath{\mathfrak{I}} }
+% Erweiterte Belegung
+\newcommand{\eBel}{\ensuremath{\hat{\mathfrak{I}}} }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abkürzungen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\oBdA}{o.\,B.\,d.\,A.\ }
+\renewcommand{\dh}{d.\,h.\ }
+\newcommand{\zB}{z.\,B.\ }
+\newcommand{\gdw}{\ensuremath{\mathrm{\ \ gdw.\ \ }}}
+
+%%%% Acronyms
+\newcommand{\ie}{i.\,e.\ }
+\newcommand{\eg}{e.\,g.\ }
+\newcommand{\cf}{c.\,f.\ }
+\newcommand{\Cf}{C.\,f.\ }
+\newcommand{\st}{s.\,t.\ }
+\newcommand{\ST}{such that}
+\newcommand{\wrt}{with respect to}
+\newcommand{\fa}{for all}
+\newcommand{\stfa}{such that for all}
+\newcommand{\wLOG}{without loss of generality}
+\newcommand{\WLOG}{Without loss of generality}
+\newcommand{\wTS}{want to show}
+\newcommand{\WTS}{Want to show}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Algorithmen und Code
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Kommentare
+\colorlet{maincolorDark}{gray}
+\renewcommand\algorithmiccomment[1]{%
+  {\color{maincolorDark}\hfill$\triangleright$\ #1}
+}
+
+% Keywords
+\newcommand\Accept{\textbf{ja}}
+\newcommand\Reject{\textbf{nein}}
+
+\algnewcommand\algorithmicOutput{\textbf{Ausgabe:}}
+\algnewcommand\Output{\item[\algorithmicOutput]}
+\algnewcommand\algorithmicInput{\textbf{Eingabe:}}
+\algnewcommand\Input{\item[\algorithmicInput]}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% Bunte Boxen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Box für Problemdef.
+\newcommand{\problemtitle}[1]{\gdef\@problemtitle{#1}}% Store problem title
+\newcommand{\probleminput}[1]{\gdef\@probleminput{#1}}% Store problem input
+\newcommand{\problemquestion}[1]{\gdef\@problemquestion{#1}}% Store problem question
+\NewEnviron{problem}{
+  \problemtitle{}\probleminput{}\problemquestion{}% Default input is empty
+  \BODY% Parse input
+  \par\addvspace{.5\baselineskip}
+  \noindent
+  \begin{tcolorbox}[arc=0.5mm]
+    \begin{tabularx}{\textwidth}{@{\hspace{\parindent}} l X p{10cm}}
+      \multicolumn{2}{@{\hspace{\parindent}}l}{\@problemtitle} \\% Title
+      \textbf{Eingabe:} & \@probleminput \\% Input
+      \textbf{Frage:} & \@problemquestion% Question
+    \end{tabularx}
+  \end{tcolorbox}
+  \par\addvspace{.5\baselineskip}
+}
+
+%%% Box für param. Problemdef.
+\newcommand{\problemparameter}[1]{\gdef\@problemparameter{#1}}% Store problem input
+\NewEnviron{paramproblem}{
+  \problemtitle{}\probleminput{}\problemparameter{}\problemquestion{}% Default input is empty
+  \BODY% Parse input
+  \par\addvspace{.5\baselineskip}
+  \noindent
+  \begin{tcolorbox}[arc=0.5mm]
+  \begin{tabularx}{\textwidth}{@{\hspace{\parindent}} l X p{10cm}}
+    \multicolumn{2}{@{\hspace{\parindent}}l}{\@problemtitle} \\% Title
+    \textbf{Eingabe:} & \@probleminput \\% Input
+    \textbf{Parameter:} & \@problemparameter \\% Input
+    \textbf{Frage:} & \@problemquestion% Question
+  \end{tabularx}
+  \end{tcolorbox}
+  \par\addvspace{.5\baselineskip}
+}
+
+%%% Box für Algorithmen
+% \newtcolorbox{algobox}{colback=orange!10,colframe=orange!50, arc=0.5mm}
+\DeclareTCBListing{mintedbox}{O{}m!O{}}{%
+  listing only,% Prevent tcolorbox from trying to compile the code
+  breakable,% Allow page breaks
+  minted language=#2,% Make the mandatory argument be the language
+  minted options={% Pass these options to minted
+    numbersep=5pt,
+    gobble=0,
+    tabsize=4,
+    breaklines=true,
+    mathescape,
+    framesep=2mm,#1},
+  % Appearance tweaks
+  top=5pt,
+  bottom=5pt,
+  arc=0.5mm,
+  colback=orange!10,
+  colframe=orange!50
+  #3}% And pass the options to tcolorbox
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Eigene Umgebungen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\spdefaulttheorem{axiom}{Axiom}{\bfseries}{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% New definitions
+\algnewcommand\algorithmicswitch{\textbf{switch}}
+\algnewcommand\algorithmiccase{\textbf{case}}
+\renewcommand{\algorithmicprocedure}{\textbf{Prozedur}}
+\algnewcommand\algorithmicassert{\texttt{assert}}
+\algnewcommand\Assert[1]{\State \algorithmicassert(#1)}%
+% New "environments"
+\algdef{SE}[SWITCH]{Switch}{EndSwitch}[1]{\algorithmicswitch\ #1\ \algorithmicdo}{\algorithmicend\ \algorithmicswitch}%
+\algdef{SE}[CASE]{Case}{EndCase}[1]{\algorithmiccase\ #1:}{\algorithmicend\ \algorithmiccase}%
+\algtext*{EndSwitch}%
+\algtext*{EndCase}%

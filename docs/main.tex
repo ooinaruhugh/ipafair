@@ -1,0 +1,105 @@
+\documentclass[oneside,12pt]{amsart}
+\usepackage{macros}
+
+\usepackage{standalone}
+
+\usepackage[
+bookmarksopen,
+bookmarksnumbered,
+%hidelinks,
+pdftitle={Towards an incremental reentrant ASP-based solver for argumentation frameworks}
+pdfauthor={Kamillo Hugh Ferry},
+pdfkeywords={project,report},
+pdfstartview={FitH},
+]{hyperref}
+
+\usepackage[backend=biber,style=numeric,backref,backrefstyle=none]{biblatex}
+\addbibresource{literature.bib}
+
+% Load LAST!
+\usepackage[nameinlink]{cleveref}
+
+
+\begin{document}
+\title[Incremental AF solver]{Towards an incremental reentrant ASP-based solver for argumentation frameworks}
+\author{Kamillo Hugh Ferry}
+\address{}
+\email{}
+
+\begin{abstract}
+    We devise a incremental ASP-based solving system for Dung's 
+    abstract argumentation frameworks. This means 
+    that we allow for dynamic changes to an input AF such as 
+    adding or removing arguments and attacks while retaining
+    the state of the underlying grounder and solver.
+    
+    This paper documents the design process and current state of 
+    the incremental solver system. Also, we details some of
+    the problems that were encountered and open issues of the 
+    cosntructed system.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+The need for incremental algorithms arises when dealing with dynamically
+changing inputs where it is desirable to process each such change relatively quickly
+and where it is not desirable to process the input every time from scratch.
+One example for such a setting are knowledge bases, and in particular,
+abstract argumentation frameworks (AFs) that model a knowledge base.
+
+Here, given an AF, we might have computed a set of possible extensions 
+satisfying a certain semantic. But when we edit this AF, e.\,g.\ to react to 
+a change in our knowledge base, and ask for the extensions of the resulting 
+framework, we can try to keep information from previous solve iterations 
+so we do not have to construct all extensions from scratch.
+
+This approach to algorithmic problems trying to retain information between
+the runs of an algorithm and incrementally solving a dynamically changing instance 
+has been studied in literature before \cite{mans_incremental_2017,miltersen_complexity_1994,patnaik_dyn-fo_1997}.
+
+An example taken from \citeauthor{patnaik_dyn-fo_1997}~\cite{patnaik_dyn-fo_1997} (Example 3.2), 
+when asking for the parity of a string of $n$ bits, if we retain the
+parity bit between calculations, we can actually express the answer using 
+propositional formulas when the allowed edits are flipping bits. 
+
+That is, suppose we have a data structure $S$ representing the state of a
+string of $n$ bits called $S_x$, and the parity bit $b$ of this string.
+We can define two operations $\mathsf{ins}(S,i)$ and $\mathsf{del}(S,i)$ 
+that represent `setting the $i$-th bit to $0$ resp.\ $1$' that edit $S$ 
+accordingly to the changes that were requested and those operations 
+can be expressed by propositional formulae as in \cref{dynfo-parity}.
+
+The main idea behind this example is that given a specific problem, we 
+might be able to identify how a change to the input affects the solution 
+and what kind of intermediate information has to be kept during each computation.
+
+Applying this to abstract argumentation frameworks, we build upon the 
+ASP-based argumentation system ASPARTIX \cite{aspartix} which already 
+provides encodings for most common semantics of argumentation frameworks, albeit static ones.
+
+ASPARTIX itself is implemented in the ASP system \emph{clingo}, whose API 
+for partial grounding and externally provided atoms is also heavily used 
+to enable editing the input AF.
+
+This is done by breaking apart the given encodings into parts that are affected
+by the insertion of an argument and parts that are affected by the 
+insertion of an attack. Whenever an argument or attack is to be added,
+the respective partial encoding is applied. 
+
+The detailed process of modifying the encodings and 
+
+\begin{figure}
+    \includestandalone[width=0.6\linewidth]{dynfo-parity}
+    \caption{Operations $\mathsf{ins}$ and $\mathsf{del}$ for calculation of parity bits}
+    \label{dynfo-parity}
+\end{figure}
+
+\section{Usage}
+\section{Modification of the \textsc{Aspartix} encodings}\label{incr-semantics}
+\section{Issues}
+\section{Open Problems}
+
+\printbibliography
+
+\end{document}
