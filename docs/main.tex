@@ -1,7 +1,13 @@
+% !TeX -shell-escape
 \documentclass[oneside,12pt]{amsart}
 \usepackage{macros}
 
 \usepackage{standalone}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+}
 
 \usepackage[
 bookmarksopen,
@@ -75,10 +81,10 @@ might be able to identify how a change to the input affects the solution
 and what kind of intermediate information has to be kept during each computation.
 
 Applying this to abstract argumentation frameworks, we build upon the 
-ASP-based argumentation system ASPARTIX \cite{aspartix} which already 
+ASP-based argumentation system ASPARTIX~\cite{aspartix} which already 
 provides encodings for most common semantics of argumentation frameworks, albeit static ones.
 
-ASPARTIX itself is implemented in the ASP system \emph{clingo}, whose API 
+ASPARTIX itself is implemented in the ASP system \emph{clingo}~\cite{clingo}, whose API 
 for partial grounding and externally provided atoms is also heavily used 
 to enable editing the input AF.
 
@@ -87,18 +93,166 @@ by the insertion of an argument and parts that are affected by the
 insertion of an attack. Whenever an argument or attack is to be added,
 the respective partial encoding is applied. 
 
-The detailed process of modifying the encodings and 
+The detailed process of modifying the encodings and modifying 
+the state of arguments and attacks is described in \cref{incr-semantics}.
+
+Examples for the usage of the current system are given in \cref{usage}.
+Current issues and possibilities for extension are described in \cref{issues,problems}
 
 \begin{figure}
     \includestandalone[width=0.6\linewidth]{dynfo-parity}
-    \caption{Operations $\mathsf{ins}$ and $\mathsf{del}$ for calculation of parity bits}
+    \caption{Operations $\mathsf{ins}$ and $\mathsf{del}$ for calculation of parity bits.}
     \label{dynfo-parity}
 \end{figure}
 
-\section{Usage}
+\section{Usage}\label{usage}
+Currently, our incremental system cannot be called from command-line. Instead, one has to 
+instanciate a \texttt{IncrAFSolver} object in Python, as follows
+\begin{mintedbox}{python}
+from incraf import IncrAFSolver
+
+af = IncrAFSolver(semantic, filename)\end{mintedbox}
+
+To create an \texttt{IncrAFSolver} object, one only needs to provide 
+a \texttt{semantic} since an AF can also be built up succesively.
+
+Arguments and attacks can be added by the respective \texttt{add}
+and \texttt{del} methods. Arguments can be named by strings
+or integers
+
+The following example adds to an framework \texttt{af}
+two arguments named \texttt{2} and \texttt{b} and an attack between
+them while removing an attack from arguments \texttt{1} to \texttt{a}.
+\begin{mintedbox}{python}
+af.add_argument(2)
+af.add_argument("b")
+af.add_attack(2,"b")
+af.del_attack(1,"a")\end{mintedbox}
+
+We can either enumerate all extensions satisfying the specified semantic with 
+\texttt{solve\_enum}, or test for credulous or skeptical satisfiability 
+with \texttt{solve\_cred} resp.\ \texttt{solve\_skept}. To get the accepted arguments
+after calling one of the latter functions, one can use \texttt{extract\_witness}.
+
+The following snippet describes the process of testing for skeptical satisfiability
+and getting the skeptically accepted arguments.
+\begin{mintedbox}{python}
+af.solve_skept()
+
+args = af.extract_witness()\end{mintedbox}
+
+More complete examples are given in the files \texttt{example\_af1.jpynb} and \texttt{example\_af2.jpynb}
+
 \section{Modification of the \textsc{Aspartix} encodings}\label{incr-semantics}
-\section{Issues}
-\section{Open Problems}
+To allow us to accept changes to our input, we need to make two adjustments
+to the way we feed the encodings to \emph{clingo}.
+\begin{itemize}
+    \item We need to add all atoms related to the input as \texttt{\#external} atoms.
+    \item The encoding for the semantic needs to be split in two parts 
+        \texttt{\#program add\_argument(v)} and \texttt{\#program add\_attack(v,u)}.
+\end{itemize}
+
+Declaring atoms as external instructs \emph{clingo} to omit \emph{certain simplifications}
+\cite[3.1.15]{clingo_guide}. For example, external atoms are not removed from rules 
+even if they do not appear in the head of any rule. 
+
+Additionally, \emph{clingo} allows us to provide the truth value for any external atom. 
+We use this to switch off arguments or attacks that have been deleted.
+
+The need to break apart an encoding nito parts related to arguments and attacks 
+comes from the fact that the initial grounding only introduces rules for 
+arguments and attacks that existed at that point. 
+Even if we add new atoms, the rules related to them that tie them to 
+a possible solution do not exist.
+
+We cannot re-ground simply since then we also try to redefine rules 
+that already existed. Yet the process of grounding can be 
+(overly simplified) thought of plugging in the actual values for variables occuring 
+in rules. Thus, breaking apart the encoding allows us to only introduce 
+only the necessary rules whenever adding an attack or argument.
+
+For this, \emph{clingo} provides the \texttt{\#program} statement to 
+denote program blocks accepting parameters. 
+
+Take for example following encoding for naive semantics taken from ASPARTIX.
+\begin{algobox}
+\begin{lstlisting}
+%% Guess a set S \subseteq A
+in(X) :- not out(X), arg(X).
+out(X) :- not in(X), arg(X).
+
+%% S has to be conflict-free
+:- in(X), in(Y), att(X,Y).
+
+%% Check Maximality
+okOut(X) :- in(Y), att(Y,X).
+okOut(X) :- in(Y), att(X,Y).
+okOut(X) :- att(X,X).
+:- out(X), not okOut(X).
+\end{lstlisting}
+\end{algobox}
+
+Obviously, the rules to guess a potential solution subset $S$ are tied 
+to a specific argument, while the rules checking for conflict-freeness
+are each tied to a specific attack. Also the rules checking for maximality 
+depend on attacks.
+
+This means that the guessing rules are added to the argument block
+while the checking rules are added to the attack block.
+
+Special care needs to be taken for the last rule. Since this one only references 
+an argument, we need to actually add this rule to the argument block.
+But since the \texttt{okOut(X)} atom does not occur in any rule head until 
+there exists an attack involving \texttt{X}, we need to mark this atom as external.
+
+The resulting incremental naive encoding then is as follows.
+\begin{algobox}
+\begin{lstlisting}
+#program add_argument(v).
+%% Guess a set S \subseteq A
+in(v) :- not out(v),arg(v).
+out(v) :- not in(v), arg(v).
+#external okOut(v).
+:-  arg(v), out(v), not okOut(v).
+
+#program add_attack(v, u).
+%% S has to be conflict-free
+:- in(v), in(u), att(v,u).
+
+%% Check Maximality
+okOut(u) :- in(v), att(v,u).
+okOut(v) :- in(u), att(v,u).
+okOut(v) :- att(v,v).
+\end{lstlisting}
+\end{algobox}
+
+With an incremental encoding as the one above, we can now add 
+an argument or an attack by first adding an external atom,
+if it did not exist before, and then performing the partial grounding 
+of either \texttt{\#program add\_argument(v)} or \texttt{\#program add\_attack(v,u)}.
+
+\section{Issues}\label{issues}
+Currently, adding new attacks might not always work since \emph{clingo} 
+throws an error that an atom gets redefined. This is related to the initial 
+problem of redefining rules, but this phenomenon only occurs 
+after calling a \texttt{solve} method once. 
+
+Thus, the reason might be instead a conflict between a truth value 
+that is already assigned to an atom and new rules causing this atom 
+to change its assignment.
+
+
+\section{Open Problems}\label{problems}
+In additon to the blocking behaviour of \emph{clingo} described in \cref{issues} 
+this solver does not provide a command-line interface yet.
+
+Also, instead of trying to use \emph{clingo} with an incremental encoding, 
+it is also possible to instead use a static encoding that produces a solution 
+and possibly additional intermediate information and retain that. 
+Then, when processing changes to an instance, we just modify the information 
+that was retained and only call the solver from scratch when necessary.
+This approach would be similar to the one presented by \citeauthor{mans_incremental_2017}~\cite{mans_incremental_2017}
+for incremental computations.
 
 \printbibliography
 

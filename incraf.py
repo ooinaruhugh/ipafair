@@ -301,7 +301,7 @@ class IncrAFSolver(AFSolver):
     def extract_witness(self) -> List[int]:
         '''
         If the previous call of `solve_cred` returned `True`, or the previous call to
-        `solve_skept` returned `False`, returns the witnessing extension.
+        `solve_skept` returned `False`, returns the witnessing extension. 
         '''
         return self.witness
 

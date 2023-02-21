@@ -8,8 +8,8 @@
 \usepackage{stmaryrd}
 
 %% Bunten Boxen, wer will bunte Boxen?
-\usepackage[breakable,xparse]{tcolorbox}
-%\usepackage[minted,breakable,xparse]{tcolorbox}
+% \usepackage[breakable,xparse]{tcolorbox}
+\usepackage[minted,breakable,xparse]{tcolorbox}
 
 \usepackage{booktabs}
 
@@ -469,7 +469,7 @@
 }
 
 %%% Box für Algorithmen
-% \newtcolorbox{algobox}{colback=orange!10,colframe=orange!50, arc=0.5mm}
+\newtcolorbox{algobox}{colback=orange!10,colframe=orange!50, arc=0.5mm}
 \DeclareTCBListing{mintedbox}{O{}m!O{}}{%
   listing only,% Prevent tcolorbox from trying to compile the code
   breakable,% Allow page breaks
