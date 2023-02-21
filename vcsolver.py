@@ -12,8 +12,6 @@ from typing import List, cast
 
 from re import match
 
-import logging
-
 def load_dimacs_without_external(ctl: Control, instance: str) -> dict:
     """
     This method is only used internally. 
