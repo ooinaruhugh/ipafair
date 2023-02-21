@@ -41,7 +41,7 @@ def make_attack(source: int | str, target: int | str) -> Symbol:
 
     return Function("att", [s, t])
 
-class incr_af_solver(AFSolver):
+class IncrAFSolver(AFSolver):
     def __init__(self, sigma: str, af_file: str | None = None):
         """
         Initializes an `AFSolver` instance using the initial argumentation framework (AF) provided in `af_file`
@@ -201,7 +201,7 @@ class incr_af_solver(AFSolver):
 
         if not old: self.ctl.ground([("add_attack", attack.arguments)])        
 
-    def del_attack(self, source: int | None = None, target: int | None = None, attack: Symbol | None = None):
+    def del_attack(self, source: int | str | None = None, target: int | str | None = None, attack: Symbol | None = None):
         '''
         Deletes an attack from arguments `source` to `target` to the current AF instance.
 
@@ -330,7 +330,7 @@ if __name__ == "__main__":
     ctl.solve(on_model=on_model)
 
     # Now, we do the same incrementally
-    af = incr_af_solver(semantic, filename)
+    af = IncrAFSolver(semantic, filename)
 
     # print("\n === Ground incremental program ===")
     # print(af.prg)
